@@ -33,6 +33,7 @@
  * MA 02110-1301 USA.
  */
 
+#include <assert.h>
 
 #include <camera44xx.h>
 #include <camera-regbits-44xx.h>
@@ -46,9 +47,15 @@
 
 /* +1 is for the END element */
 #define ISS_HL_REG_TABLE_SIZE		(24 + 1)
-#define ISS_CSI2_REG_TABLE_SIZE		(73 + 1)
+#define ISS_CSI2_REG_TABLE_SIZE		(75 + 1)
 #define ISS_CSIPHY_REG_TABLE_SIZE	(3 + 1)
 #define ISS_CCP2_REG_TABLE_SIZE		(64 + 1)
+#define ISS_ISP_IPIPEIF_REG_TABLE_SIZE  (21 + 1)
+#define ISS_ISP_IPIPE_REG_TABLE_SIZE    (19 + 1)
+#define ISS_ISP5_REG_TABLE_SIZE         (46 + 1)
+#define ISS_RSZ_REG_TABLE_SIZE          (99 + 1)
+#define ISS_CBUFF_REG_TABLE_SIZE        (7 + 1)
+#define ISS_BTE_REG_TABLE_SIZE          (9 + 1)
 
 typedef enum {
 	FDIF_FCLK,
@@ -70,6 +77,12 @@ reg_table iss_hl_reg_table[ISS_HL_REG_TABLE_SIZE];
 reg_table iss_csi2_reg_table[2][ISS_CSI2_REG_TABLE_SIZE];
 reg_table iss_csiphy_reg_table[2][ISS_CSIPHY_REG_TABLE_SIZE];
 reg_table iss_ccp2_reg_table[ISS_CCP2_REG_TABLE_SIZE];
+reg_table iss_isp_ipipeif_reg_table[ISS_ISP_IPIPEIF_REG_TABLE_SIZE];
+reg_table iss_isp_ipipe_reg_table[ISS_ISP_IPIPE_REG_TABLE_SIZE];
+reg_table iss_isp5_reg_table[ISS_ISP5_REG_TABLE_SIZE];
+reg_table iss_rsz_reg_table[ISS_RSZ_REG_TABLE_SIZE];
+reg_table iss_cbuff_reg_table[ISS_CBUFF_REG_TABLE_SIZE];
+reg_table iss_bte_reg_table[ISS_BTE_REG_TABLE_SIZE];
 
 static unsigned int init_done = 0;
 
@@ -118,6 +131,8 @@ void camera44xx_init_regtable(void)
 		iss_csi2_reg_table[k][i++].addr = CSI2_SYSCONFIG + (k * 0x400);
 		strcpy(iss_csi2_reg_table[k][i].name, "CSI2_SYSSTATUS");
 		iss_csi2_reg_table[k][i++].addr = CSI2_SYSSTATUS + (k * 0x400);
+		strcpy(iss_csi2_reg_table[k][i].name, "CSI2_IRQSTATUS");
+		iss_csi2_reg_table[k][i++].addr = CSI2_IRQSTATUS + (k * 0x400);
 		strcpy(iss_csi2_reg_table[k][i].name, "CSI2_IRQENABLE");
 		iss_csi2_reg_table[k][i++].addr = CSI2_IRQENABLE + (k * 0x400);
 		strcpy(iss_csi2_reg_table[k][i].name, "CSI2_CTRL");
@@ -259,6 +274,237 @@ void camera44xx_init_regtable(void)
 	strcpy(iss_ccp2_reg_table[i].name, "END");
 	iss_ccp2_reg_table[i].addr = 0;
 
+#define REG_NAME(TABLE,NAME,ADDR)					\
+	assert((unsigned int)i < (sizeof(TABLE) / sizeof(*TABLE)));	\
+	strcpy(TABLE[i].name, # NAME);			                \
+	TABLE[i++].addr = ADDR;
+
+	/* Init ISS ISP IPIPEIF register table */
+	i = 0;
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_ENABLE  , 0x52011200);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_CFG1    , 0x52011204);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_PPLN    , 0x52011208);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_LPFR    , 0x5201120C);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_HNUM    , 0x52011210);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_VNUM    , 0x52011214);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_ADDRU   , 0x52011218);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_ADDRL   , 0x5201121c);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_ADOFS   , 0x52011220);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_RSZ     , 0x52011214);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_GAIN    , 0x52011218);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_DPCM    , 0x5201121c);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_CFG2    , 0x52011230);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_INIRSZ  , 0x52011234);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_OCLIP   , 0x52011238);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_DTUDF   , 0x5201123C);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_CLKDIV  , 0x52011240);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_DPC1    , 0x52011244);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_DPC2    , 0x52011248);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_RSZ3A   , 0x52011254);
+	REG_NAME(iss_isp_ipipeif_reg_table, IPIPEIF_INIRSZ3A, 0x52011254);
+	REG_NAME(iss_isp_ipipeif_reg_table, NULL, 0);
+
+	/* Init subset of ISS ISP IPIPE register table */
+	i = 0;
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_EN    , 0x52010800);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_MODE  , 0x52010804);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_FMT   , 0x52010808);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_COL   , 0x5201080C);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_VPS   , 0x52010810);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_VSZ   , 0x52010814);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_HPS   , 0x52010818);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_HSZ   , 0x5201081C);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SEL_SBU   , 0x52010820);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_SRC_STA   , 0x52010824);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_GCK_MMR   , 0x52010828);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_GCK_PIX   , 0x5201082C);
+	
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_GMM_CFG   , 0x52010A5C);
+
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_YUV_ADJ   , 0x52010A94);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_YUV_PHS   , 0x52010AC8);
+
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_YEE_EN    , 0x52010AD4);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_YEE_TYP   , 0x52010AD8);
+	REG_NAME(iss_isp_ipipe_reg_table, IPIPE_YEE_SHF   , 0x52010ADC);
+	REG_NAME(iss_isp_ipipe_reg_table, NULL, 0);
+
+	/* Init ISS ISP5 register table */
+	i = 0;
+	REG_NAME(iss_isp5_reg_table, ISP5_REVISION       , 0x52010000);
+	REG_NAME(iss_isp5_reg_table, ISP5_HWINFO1        , 0x52010004);
+	REG_NAME(iss_isp5_reg_table, ISP5_HWINFO2        , 0x52010008);
+	REG_NAME(iss_isp5_reg_table, ISP5_SYSCONFIG      , 0x52010010);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW_0, 0x52010024+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW_1, 0x52010024+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW_2, 0x52010024+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW_3, 0x52010024+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_0    , 0x52010028+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_1    , 0x52010028+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_2    , 0x52010028+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_3    , 0x52010028+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET_0, 0x5201002C+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET_1, 0x5201002C+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET_2, 0x5201002C+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET_3, 0x5201002C+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR_0, 0x52010030+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR_1, 0x52010030+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR_2, 0x52010030+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR_3, 0x52010030+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_DMAENABLE_SET  , 0x52010064);
+	REG_NAME(iss_isp5_reg_table, ISP5_DMAENABLE_CLR  , 0x52010068);
+	REG_NAME(iss_isp5_reg_table, ISP5_CTRL           , 0x5201006C);
+	REG_NAME(iss_isp5_reg_table, ISP5_PG             , 0x52010070);
+	REG_NAME(iss_isp5_reg_table, ISP5_PG_PULSE_CTRL  , 0x52010074);
+	REG_NAME(iss_isp5_reg_table, ISP5_PG_FRAME_SIZE  , 0x52010078);
+	REG_NAME(iss_isp5_reg_table, ISP5_MPSR           , 0x5201007C);
+	REG_NAME(iss_isp5_reg_table, ISP5_BL_MTC_1       , 0x52010080);
+	REG_NAME(iss_isp5_reg_table, ISP5_BL_MTC_2       , 0x52010084);
+	REG_NAME(iss_isp5_reg_table, ISP5_BL_VBUSM       , 0x52010088);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW2_0, 0x520100b8+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW2_1, 0x520100b8+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW2_2, 0x520100b8+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS_RAW2_3, 0x520100b8+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS2_0    , 0x520100bc+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS2_1    , 0x520100bc+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS2_2    , 0x520100bc+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQSTATUS2_3    , 0x520100bc+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET2_0, 0x520100c0+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET2_1, 0x520100c0+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET2_2, 0x520100c0+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_SET2_3, 0x520100c0+0x10*3);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR2_0, 0x520100c4+0x10*0);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR2_1, 0x520100c4+0x10*1);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR2_2, 0x520100c4+0x10*2);
+	REG_NAME(iss_isp5_reg_table, ISP5_IRQENABLE_CLR2_3, 0x520100c4+0x10*3);
+	REG_NAME(iss_isp5_reg_table, NULL, 0);
+
+	/* Init ISS Resizer register table */
+	i = 0;
+	REG_NAME(iss_rsz_reg_table, RSZ_REVISION         , 0x52010400);
+	REG_NAME(iss_rsz_reg_table, RSZ_SYSCONFIG        , 0x52010404);
+	REG_NAME(iss_rsz_reg_table, RSZ_IN_FIFO_CTRL     , 0x5201040C);
+	REG_NAME(iss_rsz_reg_table, RSZ_GNC              , 0x52010410);
+	REG_NAME(iss_rsz_reg_table, RSZ_FRACDIV          , 0x52010414);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_EN           , 0x52010420);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_MODE         , 0x52010424);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_FMT0         , 0x52010428);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_FMT1         , 0x5201042C);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_VPS          , 0x52010430);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_VSZ          , 0x52010434);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_HPS          , 0x52010438);
+	REG_NAME(iss_rsz_reg_table, RSZ_SRC_HSZ          , 0x5201043c);
+	REG_NAME(iss_rsz_reg_table, RSZ_DMA_RRZA         , 0x52010440);
+	REG_NAME(iss_rsz_reg_table, RSZ_DMA_RZB          , 0x52010444);
+	REG_NAME(iss_rsz_reg_table, RSZ_DMA_STA          , 0x52010448);
+	REG_NAME(iss_rsz_reg_table, RSZ_GCK_MMR          , 0x5201044c);
+	REG_NAME(iss_rsz_reg_table, RSZ_GCK_SDR          , 0x52010454);
+	REG_NAME(iss_rsz_reg_table, RSZ_IRQ_RZA          , 0x52010458);
+	REG_NAME(iss_rsz_reg_table, RSZ_IRQ_RZB          , 0x5201045c);
+	REG_NAME(iss_rsz_reg_table, RSZ_YUV_Y_MIN        , 0x52010460);
+	REG_NAME(iss_rsz_reg_table, RSZ_YUV_Y_MAX        , 0x52010464);
+	REG_NAME(iss_rsz_reg_table, RSZ_YUV_C_MIN        , 0x52010468);
+	REG_NAME(iss_rsz_reg_table, RSZ_YUV_C_MAX        , 0x5201046c);
+	REG_NAME(iss_rsz_reg_table, RSZ_YUV_PHS          , 0x52010470);
+	REG_NAME(iss_rsz_reg_table, RSZ_SEQ              , 0x52010474);
+	REG_NAME(iss_rsz_reg_table, RZA_EN               , 0x52010478);
+	REG_NAME(iss_rsz_reg_table, RZA_MODE             , 0x5201047c);
+	REG_NAME(iss_rsz_reg_table, RZA_420              , 0x52010480);
+	REG_NAME(iss_rsz_reg_table, RZA_I_VPS            , 0x52010484);
+	REG_NAME(iss_rsz_reg_table, RZA_I_HPS            , 0x52010488);
+	REG_NAME(iss_rsz_reg_table, RZA_O_VSZ            , 0x5201048c);
+	REG_NAME(iss_rsz_reg_table, RZA_O_HSZ            , 0x52010490);
+	REG_NAME(iss_rsz_reg_table, RZA_V_PHS_Y          , 0x52010494);
+	REG_NAME(iss_rsz_reg_table, RZA_V_PHS_C          , 0x52010498);
+	REG_NAME(iss_rsz_reg_table, RZA_V_DIF            , 0x5201049c);
+	REG_NAME(iss_rsz_reg_table, RZA_V_TYP            , 0x520104a0);
+	REG_NAME(iss_rsz_reg_table, RZA_V_LPF            , 0x520104a4);
+	REG_NAME(iss_rsz_reg_table, RZA_H_PHS            , 0x520104a8);
+	REG_NAME(iss_rsz_reg_table, RZA_H_PHS_ADJ        , 0x520104ac);
+	REG_NAME(iss_rsz_reg_table, RZA_H_DIF            , 0x520104b0);
+	REG_NAME(iss_rsz_reg_table, RZA_H_TYP            , 0x520104b4);
+	REG_NAME(iss_rsz_reg_table, RZA_H_LPF            , 0x520104b8);
+	REG_NAME(iss_rsz_reg_table, RZA_DWN_EN           , 0x520104bc);
+	REG_NAME(iss_rsz_reg_table, RZA_DWN_AV           , 0x520104c0);
+	REG_NAME(iss_rsz_reg_table, RZA_RGB_EN           , 0x520104c4);
+	REG_NAME(iss_rsz_reg_table, RZA_RGB_TYP          , 0x520104c8);
+	REG_NAME(iss_rsz_reg_table, RZA_RGB_BLD          , 0x520104cc);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_BAD_H      , 0x520104d0);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_BAD_L      , 0x520104d4);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_SAD_H      , 0x520104d8);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_SAD_L      , 0x520104dc);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_OFT        , 0x520104e0);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_PTR_S      , 0x520104e4);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_Y_PTR_E      , 0x520104e8);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_BAD_H      , 0x520104ec);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_BAD_L      , 0x520104f0);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_SAD_H      , 0x520104f4);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_SAD_L      , 0x520104f8);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_OFT        , 0x520104fc);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_PTR_S      , 0x52010500);
+	REG_NAME(iss_rsz_reg_table, RZA_SDR_C_PTR_E      , 0x52010504);
+	REG_NAME(iss_rsz_reg_table, RZB_EN               , 0x52010508);
+	REG_NAME(iss_rsz_reg_table, RZB_MODE             , 0x5201050c);
+	REG_NAME(iss_rsz_reg_table, RZB_420              , 0x52010510);
+	REG_NAME(iss_rsz_reg_table, RZB_I_VPS            , 0x52010514);
+	REG_NAME(iss_rsz_reg_table, RZB_I_HPS            , 0x52010518);
+	REG_NAME(iss_rsz_reg_table, RZB_O_VSZ            , 0x5201051c);
+	REG_NAME(iss_rsz_reg_table, RZB_O_HSZ            , 0x52010520);
+	REG_NAME(iss_rsz_reg_table, RZB_V_PHS_Y          , 0x52010524);
+	REG_NAME(iss_rsz_reg_table, RZB_V_PHS_c          , 0x52010528);
+	REG_NAME(iss_rsz_reg_table, RZB_V_DIF            , 0x5201052c);
+	REG_NAME(iss_rsz_reg_table, RZB_V_TYP            , 0x52010530);
+	REG_NAME(iss_rsz_reg_table, RZB_V_LPF            , 0x52010534);
+	REG_NAME(iss_rsz_reg_table, RZB_H_PHS            , 0x52010538);
+	REG_NAME(iss_rsz_reg_table, RZB_H_PHS_ADJ        , 0x5201053c);
+	REG_NAME(iss_rsz_reg_table, RZB_H_DIF            , 0x52010540);
+	REG_NAME(iss_rsz_reg_table, RZB_H_TYP            , 0x52010544);
+	REG_NAME(iss_rsz_reg_table, RZB_H_LPF            , 0x52010548);
+	REG_NAME(iss_rsz_reg_table, RZB_DWN_EN           , 0x5201054c);
+	REG_NAME(iss_rsz_reg_table, RZB_DWN_AV           , 0x52010550);
+	REG_NAME(iss_rsz_reg_table, RZB_RGB_EN           , 0x52010554);
+	REG_NAME(iss_rsz_reg_table, RZB_RGB_TYP          , 0x52010558);
+	REG_NAME(iss_rsz_reg_table, RZB_RGB_BLD          , 0x5201055c);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_BAD_H      , 0x52010560);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_BAD_L      , 0x52010564);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_SAD_H      , 0x52010568);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_SAD_L      , 0x5201056c);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_OFT        , 0x52010570);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_PTR_S      , 0x52010574);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_Y_PTR_E      , 0x52010578);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_BAD_H      , 0x5201057c);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_BAD_L      , 0x52010580);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_SAD_H      , 0x52010584);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_SAD_L      , 0x52010588);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_OFT        , 0x5201058c);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_PTR_S      , 0x52010590);
+	REG_NAME(iss_rsz_reg_table, RZB_SDR_C_PTR_E      , 0x52010594);
+	REG_NAME(iss_rsz_reg_table, NULL, 0);
+
+	/* Init ISS CBUFF register table */
+	i = 0;
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_REVISION     , 0x52001800);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_HWINFO       , 0x52001804);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_SYSCONFIG    , 0x52001810);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_IRQSTATUS_RAW, 0x52001820);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_IRQSTATUS    , 0x52001824);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_IRQENABLE_SET, 0x52001828);
+	REG_NAME(iss_cbuff_reg_table, CBUFF_HL_IRQENABLE_CLR, 0x5200182C);
+	REG_NAME(iss_cbuff_reg_table, NULL, 0);
+
+	/* Init ISS BTE register table */
+	i = 0;
+	REG_NAME(iss_bte_reg_table, BTE_HL_REVISION       , 0x52002000);
+	REG_NAME(iss_bte_reg_table, BTE_HL_HWINFO         , 0x52002004);
+	REG_NAME(iss_bte_reg_table, BTE_HL_SYSCONFIG      , 0x52002010);
+	REG_NAME(iss_bte_reg_table, BTE_HL_IRQSTATUS_RAW  , 0x52002020);
+	REG_NAME(iss_bte_reg_table, BTE_HL_IRQSTATUS      , 0x52002024);
+	REG_NAME(iss_bte_reg_table, BTE_HL_IRQENABLE_SET  , 0x52002028);
+	REG_NAME(iss_bte_reg_table, BTE_HL_IRQENABLE_CLR  , 0x5200202C);
+	REG_NAME(iss_bte_reg_table, BTE_CTRL              , 0x52002030);
+	REG_NAME(iss_bte_reg_table, BTE_CTRL1             , 0x52002034);
+	REG_NAME(iss_bte_reg_table, NULL, 0);
+
 	init_done = 1;
 }
 
@@ -296,6 +542,30 @@ int camera44xx_name2addr(char *name, unsigned int *addr)
 	}
 
 	ret = name2addr(name, addr, iss_ccp2_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_isp_ipipeif_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_isp_ipipe_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_isp5_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_rsz_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_cbuff_reg_table);
+	if (ret == 0)
+		return 0;
+
+	ret = name2addr(name, addr, iss_bte_reg_table);
 	if (ret == 0)
 		return 0;
 
@@ -1010,6 +1280,15 @@ int camera44xx_dump(char *camera_mod)
 		} else {
 			ret = dumpregs(iss_ccp2_reg_table);
 		}
+	}
+
+	if ((strcmp(camera_mod, "all") == 0)) {
+		ret = dumpregs(iss_isp_ipipeif_reg_table);
+		ret = dumpregs(iss_isp_ipipe_reg_table);
+		ret = dumpregs(iss_isp5_reg_table);
+		ret = dumpregs(iss_rsz_reg_table);
+		ret = dumpregs(iss_cbuff_reg_table);
+		ret = dumpregs(iss_bte_reg_table);
 	}
 
 	if (ret == OMAPCONF_ERR_ARG)
